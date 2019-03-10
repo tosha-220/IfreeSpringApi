@@ -1,0 +1,35 @@
+version: "2"
+services:
+  rabbitmq:
+    image: rabbitmq:3.7.12-management
+    ports:
+    - "15672:15672"
+    - "5672:5672"
+
+  postgres-database:
+    restart: always
+    image: postgres:11.2
+    ports:
+    - "5432:5432"
+    environment:
+    - POSTGRES_USER=postgres
+    - POSTGRES_PASSWORD=postgres
+    - POSTGRES_DB=orders_db
+
+  ifree-api:
+    restart: always
+    image: com.ifree.spring-rabbit-sql-example:master_latest
+    ports:
+    - "8080:8080"
+    - "5005:5005"
+    environment:
+      - PG_USER=postgres
+      - PG_PASSWORD=postgres
+      - PG_URL=postgres-database:5432/orders_db
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_USER=guest
+      - RABBITMQ_PASSWORD=guest
+      - QUEUE_NAME=TEST_QUEUE
+    depends_on:
+    - postgres-database
+    - rabbitmq
